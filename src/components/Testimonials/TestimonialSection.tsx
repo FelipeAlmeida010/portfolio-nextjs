@@ -29,7 +29,7 @@ const TestimonialSection: React.FC<TestimonialSectionProps> = ({ testimonials })
     <section id="testimonials">
       <SectionHeading
         title="// Depoimentos"
-        subtitle="Para reforçar a qualidade das minha habilidades - veja o que usuários reais dos meus serviços têm a dizer sobre sua experiência."
+        subtitle="Para reforçar a qualidade das minhas habilidades - veja o que usuários reais dos meus serviços têm a dizer sobre sua experiência."
       />
 
       {/* Container scrollável */}
