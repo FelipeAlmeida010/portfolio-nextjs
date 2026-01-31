@@ -1,58 +1,56 @@
 'use server'
 
 import { Resend } from 'resend'
+import { contactSchema } from '@/schemas/contact-schema'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
-const action = async (
-  _: { success: boolean; message: string } | null,
-  formData: FormData
-) => {
+type ActionState = {
+  success: boolean
+  message: string
+} | null
+
+const action = async (_: ActionState, formData: FormData) => {
   try {
-    const name = formData.get('name') as string | null
-    if (!name) {
-      return {
-        success: false,
-        message: 'Please provide your name.',
-      }
+    const rawData = {
+      name: formData.get('name'),
+      email: formData.get('email'),
+      subject: formData.get('subject') || undefined,
+      message: formData.get('message'),
     }
 
-    const email = formData.get('email') as string | null
-    if (!email) {
-      return {
-        success: false,
-        message: 'Please provide your email address.',
-      }
-    }
+    const parsed = contactSchema.safeParse(rawData)
 
-    const subject = formData.get('subject') as string | null
+    if (!parsed.success) {
+  const firstError = parsed.error.issues[0]
 
-    const message = formData.get('message') as string | null
-    if (!message) {
-      return {
-        success: false,
-        message: 'Please provide a message.',
-      }
-    }
+  return {
+    success: false,
+    message: firstError?.message ?? 'Dados inválidos.',
+  }
+}
+
+
+    const { name, email, subject, message } = parsed.data
 
     await resend.emails.send({
       from: 'Portfolio <onboarding@resend.dev>',
       to: [process.env.CONTACT_EMAIL!],
       replyTo: email,
-      subject: subject || `New contact from ${name}`,
+      subject: subject || `Novo contato de ${name}`,
       html: `
-        <h2>New Contact Message</h2>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        ${subject ? `<p><strong>Subject:</strong> ${subject}</p>` : ''}
-        <p><strong>Message:</strong></p>
+        <h2>Novo contato pelo portfólio</h2>
+        <p><strong>Nome:</strong> ${name}</p>
+        <p><strong>E-mail:</strong> ${email}</p>
+        ${subject ? `<p><strong>Assunto:</strong> ${subject}</p>` : ''}
+        <p><strong>Mensagem:</strong></p>
         <p>${message}</p>
       `,
     })
 
     return {
       success: true,
-      message: 'Obrigado pela sua contribuição! Entrarei em contato em breve.',
+      message: 'Mensagem enviada com sucesso! Entrarei em contato em breve.',
     }
   } catch (error) {
     console.error('Contact form submission error:', error)
