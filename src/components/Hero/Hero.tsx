@@ -26,7 +26,7 @@ const Hero = () => {
           </h1>
 
           <h2 className="text-neutral mt-3 text-base sm:text-lg">
-            Criar soluções inovadoras para resolver problemas do mundo real.
+            Crio soluções inovadoras para resolver problemas do mundo real.
 
           </h2>
 
